@@ -87,7 +87,8 @@ jobs:
           if ! gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
             gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --draft --title "Buckwheat Quick ${RELEASE_TAG#v}" --generate-notes
           fi
-          if ! gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | rg -Fxq buckwheat-quick.apk; then
+          has_apk="$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq 'any(.assets[]; .name == "buckwheat-quick.apk")')"
+          if [ "$has_apk" != "true" ]; then
             gh release upload "$RELEASE_TAG" release/buckwheat-quick.apk release/SHA256SUMS --repo "$GITHUB_REPOSITORY" --clobber
           fi
           gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest
