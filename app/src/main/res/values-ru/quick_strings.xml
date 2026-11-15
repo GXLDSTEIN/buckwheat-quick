@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="quick_uncategorized">Без категории</string>
+    <string name="quick_add_category">+ Категория</string>
+    <string name="quick_category_name">Название категории</string>
+    <string name="quick_add_comment">Добавить комментарий</string>
+    <string name="quick_comment">Комментарий</string>
+    <string name="quick_left_today">Осталось на сегодня</string>
+    <string name="quick_left_period">Осталось до %1$s</string>
+    <string name="quick_open_budget">Бюджет и период</string>
+    <string name="quick_saved">Расход сохранён</string>
+    <string name="quick_undo">Отменить</string>
+    <string name="quick_save_failed">Не удалось сохранить. Попробуйте ещё раз.</string>
+    <string name="quick_saving">Сохраняем…</string>
+    <string-array name="quick_default_categories">
+        <item>Продукты</item>
+        <item>Кафе</item>
+        <item>Транспорт</item>
+        <item>Дом</item>
+        <item>Здоровье</item>
+        <item>Покупки</item>
+        <item>Развлечения</item>
+        <item>Подписки</item>
+    </string-array>
+    <string name="quick_save">Сохранить расход</string>
+    <string name="quick_category_hint">Выбирайте категории расходов, чтобы видеть распределение</string>
+</resources>

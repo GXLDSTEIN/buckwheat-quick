@@ -11,6 +11,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.danilkinkin.buckwheat.data.SpendsViewModel
+import androidx.compose.ui.res.stringResource
+import com.danilkinkin.buckwheat.R
 import com.danilkinkin.buckwheat.data.ExtendCurrency
 import com.danilkinkin.buckwheat.data.entities.Transaction
 import com.danilkinkin.buckwheat.data.entities.TransactionType
@@ -26,8 +31,10 @@ fun SpentItem(
     transaction: Transaction,
     currency: ExtendCurrency,
     modifier: Modifier = Modifier,
+    spendsViewModel: SpendsViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
+    val categories by spendsViewModel.categories.observeAsState(emptyList())
     Column(Modifier.padding(bottom = 14.dp)) {
         Row(modifier.fillMaxWidth()) {
             Column(
@@ -61,6 +68,13 @@ fun SpentItem(
                 )
             }
         }
+        Text(
+            modifier = Modifier.padding(horizontal = 32.dp),
+            text = categories.find { it.id == transaction.categoryId }?.name
+                ?: stringResource(R.string.quick_uncategorized),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
+        )
         if (transaction.comment.isNotEmpty()) {
             Text(
                 modifier = Modifier.padding( horizontal = 32.dp),

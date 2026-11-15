@@ -74,7 +74,6 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(Unit) {
                 syncTheme(localContext)
                 syncOverrideLocale(localContext)
-                migrateToDataStore(context, storageDao)
 
                 // App ready for work
                 isReady.value = true

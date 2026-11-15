@@ -81,7 +81,7 @@ fun rememberExportCSV(
 
                 val printer = CSVPrinter(
                     stream?.writer(),
-                    CSVFormat.Builder.create().setHeader("amount", "comment", "commit_time")
+                    CSVFormat.Builder.create().setHeader("amount", "category", "comment", "commit_time")
                         .build()
                 )
                 val dateFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
@@ -89,6 +89,7 @@ fun rememberExportCSV(
                 spendsViewModel.spends.value!!.forEach { spent ->
                     printer.printRecord(
                         spent.value,
+                        spendsViewModel.categories.value.orEmpty().find { it.id == spent.categoryId }?.name ?: "",
                         spent.comment,
                         spent.date.toLocalDateTime().format(dateFormatter),
                     )

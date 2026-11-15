@@ -16,8 +16,11 @@ interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE uid = :uid")
     fun getById(uid: Int): Transaction?
 
+    @Query("SELECT * FROM transactions WHERE periodId = :periodId ORDER BY date ASC")
+    fun getForPeriod(periodId: String): List<Transaction>
+
     @Insert
-    fun insert(vararg transaction: Transaction)
+    fun insert(vararg transaction: Transaction): List<Long>
 
     @Update(entity = Transaction::class, onConflict = OnConflictStrategy.REPLACE)
     fun update(vararg transaction: Transaction)

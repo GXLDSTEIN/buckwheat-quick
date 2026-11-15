@@ -10,3 +10,9 @@
 .cxx
 local.properties
 .java-version
+
+.gradle/
+**/build/
+*.jks
+*.keystore
+/dist/

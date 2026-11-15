@@ -100,7 +100,7 @@ fun CurrentSpendEditor(
 
     LaunchedEffect(focusController) {
         focusController.onFocus.value = {
-            if (currState != AnimState.EDITING) {
+            if (currState != AnimState.EDITING && editorViewModel.saving.value != true) {
                 requestFocus = true
                 calculateValues()
 
@@ -113,7 +113,7 @@ fun CurrentSpendEditor(
         }
     }
 
-    BoxWithConstraints(modifier) {
+    Box(modifier) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.CenterEnd,

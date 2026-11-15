@@ -10,11 +10,11 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.danilkinkin.buckwheat"
+        applicationId = "app.buckwheat.quick"
         minSdk = 29
         targetSdk = 36
-        versionCode = 29
-        versionName = "4.8.0"
+        versionCode = 1
+        versionName = "0.1.0"
         testInstrumentationRunner = "com.danilkinkin.buckwheat.CustomTestRunner"
     }
 
@@ -23,14 +23,26 @@ android {
         arg("dagger.hilt.disableModulesHaveInstallInCheck", "true")
     }
 
+    signingConfigs {
+        create("personal") {
+            val keyPath = providers.environmentVariable("BUCKWHEAT_KEYSTORE").orNull
+                ?: "${System.getProperty("user.home")}/.local/share/buckwheat-quick/signing.jks"
+            storeFile = file(keyPath)
+            storePassword = providers.environmentVariable("BUCKWHEAT_STORE_PASSWORD").orNull ?: "buckwheat-quick"
+            keyAlias = "buckwheat-quick"
+            keyPassword = providers.environmentVariable("BUCKWHEAT_KEY_PASSWORD").orNull ?: storePassword
+        }
+    }
+
     buildTypes {
         getByName("debug") {
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("personal")
         }
 
         getByName("release") {
-            isMinifyEnabled = true
-            signingConfig = signingConfigs.getByName("debug")
+            // Keep the first personal build quick to reproduce and easy to inspect.
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("personal")
 
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

@@ -8,6 +8,11 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.asFlow
+import androidx.lifecycle.asLiveData
+import kotlinx.coroutines.flow.combine
+import com.danilkinkin.buckwheat.data.dao.CategoryDao
+import com.danilkinkin.buckwheat.data.entities.Category
+import java.util.UUID
 import androidx.lifecycle.map
 import com.danilkinkin.buckwheat.budgetDataStore
 import com.danilkinkin.buckwheat.data.RestedBudgetDistributionMethod
@@ -33,6 +38,8 @@ val currencyStoreKey = stringPreferencesKey("currency")
 val restedBudgetDistributionMethodStoreKey = stringPreferencesKey("restedBudgetDistributionMethod")
 val hideOverspendingWarnStoreKey = booleanPreferencesKey("hideOverspendingWarn")
 
+val periodIdStoreKey = stringPreferencesKey("periodId")
+
 val budgetStoreKey = stringPreferencesKey("budget")
 val spentStoreKey = stringPreferencesKey("spent")
 val dailyBudgetStoreKey = stringPreferencesKey("dailyBudget")
@@ -45,21 +52,25 @@ val finishPeriodActualDateStoreKey = longPreferencesKey("finishPeriodActualDate"
 class SpendsRepository @Inject constructor(
     @ApplicationContext val context: Context,
     private val transactionDao: TransactionDao,
+    private val categoryDao: CategoryDao,
     private val getCurrentDateUseCase: GetCurrentDateUseCase,
 ) {
-    fun getAllTransactions(): LiveData<List<Transaction>> = transactionDao.getAll()
-    fun getAllSpends(): LiveData<List<Transaction>> = transactionDao.getAll(TransactionType.SPENT)
+    fun getAllTransactions(): LiveData<List<Transaction>> = combine(
+        transactionDao.getAll().asFlow(),
+        context.budgetDataStore.data.map { it[periodIdStoreKey] ?: "" },
+    ) { transactions, periodId -> transactions.filter { it.periodId == periodId } }.asLiveData()
 
-    fun getAllTags(): LiveData<List<String>> = transactionDao.getAll().map { transactions ->
-        transactions
-            .asSequence()
-            .filter { transaction -> transaction.comment.isNotEmpty() }
-            .groupBy { it.comment }
-            .map { it.key to it.value.size }
-            .sortedBy { -it.second }
-            .map { it.first }
-            .distinct()
-            .toList()
+    fun getAllSpends(): LiveData<List<Transaction>> = getAllTransactions().map { transactions ->
+        transactions.filter { it.type == TransactionType.SPENT }
+    }
+
+    fun getCategories(): LiveData<List<Category>> = categoryDao.getAll()
+
+    fun addCategory(name: String): Category {
+        require(name.isNotBlank())
+        val category = Category(name = name.trim())
+        categoryDao.insert(category)
+        return category
     }
 
     fun getBudget() = context.budgetDataStore.data.map {
@@ -103,7 +114,7 @@ class SpendsRepository @Inject constructor(
     fun getRestedBudgetDistributionMethod() = context.budgetDataStore.data.map { it ->
         it[restedBudgetDistributionMethodStoreKey]?.let {
             RestedBudgetDistributionMethod.valueOf(it)
-        } ?: RestedBudgetDistributionMethod.ASK
+        } ?: RestedBudgetDistributionMethod.REST
     }
 
     fun getHideOverspendingWarn() = context.budgetDataStore.data.map {
@@ -130,7 +141,9 @@ class SpendsRepository @Inject constructor(
     }
 
     suspend fun setBudget(newBudget: BigDecimal, newFinishDate: Date) {
+        val periodId = UUID.randomUUID().toString()
         context.budgetDataStore.edit {
+            it[periodIdStoreKey] = periodId
             it[budgetStoreKey] = newBudget.toString()
             it[spentStoreKey] = BigDecimal.ZERO.toString()
             it[dailyBudgetStoreKey] = BigDecimal.ZERO.toString()
@@ -150,12 +163,12 @@ class SpendsRepository @Inject constructor(
             )
         }
 
-        transactionDao.deleteAll()
         transactionDao.insert(
             Transaction(
                 TransactionType.INCOME,
                 newBudget,
                 getCurrentDateUseCase(),
+                periodId = periodId,
             )
         )
 
@@ -181,9 +194,9 @@ class SpendsRepository @Inject constructor(
             )
         }
 
-        val incomeTransaction = transactionDao.getAll(TransactionType.INCOME).asFlow().first().first()
+        val incomeTransaction = transactionDao.getForPeriod(context.budgetDataStore.data.first()[periodIdStoreKey] ?: "").first { it.type == TransactionType.INCOME }
 
-        transactionDao.update(incomeTransaction.copy(value = newBudget))
+        transactionDao.update(incomeTransaction.copy(value = newBudget).also { it.uid = incomeTransaction.uid })
 
         updateDailyBudget(whatBudgetForDay())
     }
@@ -219,8 +232,8 @@ class SpendsRepository @Inject constructor(
         }
 
 
-        val setDailyBudgetTransaction = transactionDao.getAll(TransactionType.SET_DAILY_BUDGET).asFlow().first().last()
-        transactionDao.update(setDailyBudgetTransaction.copy(value = newDailyBudget))
+        val setDailyBudgetTransaction = transactionDao.getForPeriod(context.budgetDataStore.data.first()[periodIdStoreKey] ?: "").last { it.type == TransactionType.SET_DAILY_BUDGET }
+        transactionDao.update(setDailyBudgetTransaction.copy(value = newDailyBudget).also { it.uid = setDailyBudgetTransaction.uid })
     }
 
     suspend fun setDailyBudget(newDailyBudget: BigDecimal) {
@@ -248,6 +261,7 @@ class SpendsRepository @Inject constructor(
                 TransactionType.SET_DAILY_BUDGET,
                 newDailyBudget,
                 getCurrentDateUseCase(),
+                periodId = context.budgetDataStore.data.first()[periodIdStoreKey] ?: "",
             )
         )
     }
@@ -433,7 +447,11 @@ class SpendsRepository @Inject constructor(
     }
 
     suspend fun addSpent(newTransaction: Transaction) {
-        this.transactionDao.insert(newTransaction)
+        val storedTransaction = newTransaction.copy(
+            periodId = context.budgetDataStore.data.first()[periodIdStoreKey] ?: "",
+        ).also { it.uid = newTransaction.uid }
+        storedTransaction.uid = this.transactionDao.insert(storedTransaction).single().toInt()
+        newTransaction.uid = storedTransaction.uid
 
         context.budgetDataStore.edit {
             try {
@@ -477,6 +495,29 @@ class SpendsRepository @Inject constructor(
             } catch (e: Exception) {
                 context.errorForReport = e.stackTraceToString()
             }
+        }
+    }
+
+    suspend fun editSpent(original: Transaction, updated: Transaction) {
+        val stored = updated.copy(periodId = original.periodId).also { it.uid = original.uid }
+        transactionDao.update(stored)
+        // Editing just the category or comment must never recalculate the budget.
+        if (original.value == updated.value && original.date == updated.date) return
+        context.budgetDataStore.edit { preferences ->
+            fun apply(transaction: Transaction, sign: Int) {
+                val delta = transaction.value.multiply(sign.toBigDecimal())
+                if (isSameDay(transaction.date, getCurrentDateUseCase())) {
+                    preferences[spentFromDailyBudgetStoreKey] =
+                        (preferences[spentFromDailyBudgetStoreKey]!!.toBigDecimal() + delta).toString()
+                } else {
+                    val days = countDays(Date(preferences[finishPeriodDateStoreKey]!!), getCurrentDateUseCase()).coerceAtLeast(1)
+                    val spread = delta.divide(days.toBigDecimal(), 2, RoundingMode.HALF_EVEN)
+                    preferences[spentStoreKey] = (preferences[spentStoreKey]!!.toBigDecimal() + delta).toString()
+                    preferences[dailyBudgetStoreKey] = (preferences[dailyBudgetStoreKey]!!.toBigDecimal() - spread).toString()
+                }
+            }
+            apply(original, -1)
+            apply(updated, 1)
         }
     }
 

@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun EditorToolbar(
+    onOpenHistory: (() -> Unit)? = null,
     spendsViewModel: SpendsViewModel = hiltViewModel(),
     appViewModel: AppViewModel = hiltViewModel(),
     editorViewModel: EditorViewModel = hiltViewModel(),
@@ -85,7 +86,25 @@ fun EditorToolbar(
         if (mode == EditMode.EDIT) {
             CancelEditSpent()
         } else {
-            RestBudgetPill()
+            androidx.compose.material3.Text(
+                text = androidx.compose.ui.res.stringResource(R.string.app_name),
+                style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            )
+            if (onOpenHistory != null) {
+                BigIconButton(
+                    icon = painterResource(R.drawable.ic_clock),
+                    contentDescription = androidx.compose.ui.res.stringResource(R.string.history_title),
+                    onClick = onOpenHistory,
+                )
+            }
+            BigIconButton(
+                icon = painterResource(R.drawable.ic_balance_wallet),
+                contentDescription = androidx.compose.ui.res.stringResource(R.string.quick_open_budget),
+                onClick = { appViewModel.openSheet(PathState(com.danilkinkin.buckwheat.wallet.WALLET_SHEET)) },
+            )
         }
         Spacer(modifier = Modifier.width(4.dp))
         BigIconButton(

@@ -1,40 +1,40 @@
-[<img width="100%" height="auto" src="/screenshots/en/github-screenshot.png" alt="Buckwheat logo with screenshots" />](https://buckwheat.app/)
+# Buckwheat Quick
 
-[![Latest release][release-badge]](https://github.com/danilkinkin/buckwheat/releases)
-[![Crowdin localization][localization-badge]](https://translate.buckwheat.app)
+Fast expense entry with visible daily and period balances. A personal fork of [danilkinkin/buckwheat](https://github.com/danilkinkin/buckwheat), built with Kotlin and Jetpack Compose.
 
-[**Buckwheat**](https://buckwheat.app) is an app that helps you spend money wisely. 
-Writing down each spending sobers the mind and gives you an idea of how much and how you can spend.
+## Install and update
 
-Are you going on a business trip or vacation? Buckwheat helps you save money during your trip.
+**[Download the latest APK](https://github.com/GXLDSTEIN/buckwheat-quick/releases/latest)** · Android 10 or newer.
 
-[<img alt='Get it on Google Play' height="60" src='/screenshots/en/get-it-on-google-play.png' />](https://play.google.com/store/apps/details?id=com.danilkinkin.buckwheat)
-[<img alt='Get it on GitHub' height="60" src='/screenshots/en/get-it-on-github.png' />](https://github.com/danilkinkin/buckwheat/releases)
-[<img alt='Get it on IzzyOnDroid' height="60" src='/screenshots/en/get-it-on-izzy-on-droid.png' />](https://apt.izzysoft.de/fdroid/index/apk/com.danilkinkin.buckwheat)
-[<img alt='Get it on F-Droid' height="60" src='/screenshots/en/get-it-on-fdroid.png' />](https://f-droid.org/packages/com.danilkinkin.buckwheat)
+To receive updates through [Obtainium](https://github.com/ImranR98/Obtainium):
 
-### Motivation
+1. Open Obtainium → **Add app**.
+2. Paste `https://github.com/GXLDSTEIN/buckwheat-quick` as the source URL.
+3. Add the app and install the APK. Future published releases appear as updates.
 
-A couple of years ago, I used the [tzlvt](https://www.fuckgrechka.ru/tzlvt/) app. I liked his idea and it helped me learn how to manage money. After I decided to improve this idea and it inspired me to create buckwheat
+Each release has one universal APK, `buckwheat-quick.apk`. No APK filter or architecture selection is needed. Releases keep the same application ID and signing certificate, so updates preserve your purchases. This is a separate app from upstream Buckwheat, and starts with its own empty database on first installation.
 
-### Translations
+### Установка через Obtainium
 
-If your language is missing or incomplete, please help to translate via [crowdin service](https://translate.buckwheat.app)
+Открой Obtainium → **Добавить приложение**, вставь ссылку `https://github.com/GXLDSTEIN/buckwheat-quick` и добавь приложение. Обновления будут поступать из Releases этого репозитория.
 
-### Donate
+При первом запуске задай бюджет и дату окончания периода: конец месяца или следующую зарплату. Для записи покупки достаточно суммы и нажатия галочки; категория и комментарий необязательны.
 
-If you want to support my work, you can share my app with friends or check another options on [special page](https://buckwheat.app/contribute)
+## Features
 
-### Other information
+- Numeric keypad ready for recording a purchase.
+- Separate category and optional free-text comment; frequently used categories first.
+- Signed balance for today and the selected budget period, including overspending.
+- Undo after adding an expense, history access, category analytics and CSV export.
+- Automatic redistribution of the remaining budget across the remaining days by default.
+- Local financial records: no account or synchronization required.
 
-**Press Kit**: [Google Drive](https://drive.google.com/drive/folders/1DsVynLPhYvKJNIlFAz87GnK53ja3Suap?usp=sharing)
+Archive browsing, full backup/restore and advanced category management are planned beyond the first version.
 
-**Policy**: [You can read there](./POLICY.md)
+## Development
 
-**License**: [GNU GPL v3](LICENSE)
+See [QUICKSTART.md](QUICKSTART.md) for building, signing and publishing releases; [CHANGELOG.md](CHANGELOG.md) for changes; [VALIDATION.md](VALIDATION.md) for the first version's checks.
 
-Developed by [Danil Зakhvatkin](https://github.com/danilkinkin) and [contributors](https://github.com/danilkinkin/buckwheat/graphs/contributors)
+## Upstream and license
 
-[comment]: <> (Images)
-[release-badge]: https://img.shields.io/github/v/tag/danilkinkin/buckwheat?color=orange&label=release
-[localization-badge]: https://badges.crowdin.net/buckwheat/localized.svg
+Forked from [Buckwheat](https://github.com/danilkinkin/buckwheat), developed by [Danil Зakhvatkin](https://github.com/danilkinkin) and [contributors](https://github.com/danilkinkin/buckwheat/graphs/contributors). See the [original README](UPSTREAM_README.md). Licensed under [GNU GPL v3](LICENSE).

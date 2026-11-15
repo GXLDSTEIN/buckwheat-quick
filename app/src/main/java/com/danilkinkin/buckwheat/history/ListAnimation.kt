@@ -83,9 +83,7 @@ fun updateAnimatedItemsState(
                 oldList[oldItemPosition].item.key == newList[newItemPosition].key
 
             override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
-                (oldList[oldItemPosition].item.contentHash
-                    ?: oldList[oldItemPosition].item.key) == (newList[newItemPosition].contentHash
-                    ?: newList[newItemPosition].key)
+                oldList[oldItemPosition].item == newList[newItemPosition]
 
             override fun getChangePayload(oldItemPosition: Int, newItemPosition: Int): RowEntity =
                 newList[newItemPosition]
@@ -116,9 +114,10 @@ fun updateAnimatedItemsState(
             }
 
             override fun onChanged(position: Int, count: Int, payload: Any?) {
-                for (i in 0 until count) {
-                    compositeList[position + i].item.dayTotal = (payload as RowEntity).dayTotal
-                    compositeList[position + i].item.contentHash = payload.contentHash
+                val updated = payload as RowEntity
+                val index = compositeList.indexOfFirst { it.item.key == updated.key }
+                if (index >= 0) {
+                    compositeList[index] = AnimatedItem(compositeList[index].visibility, updated)
                 }
             }
         })

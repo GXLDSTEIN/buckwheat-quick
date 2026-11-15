@@ -23,13 +23,23 @@ class EditorViewModel @Inject constructor(
     var editedTransaction: Transaction? = null
     var currentDate: Date = Date()
     var currentSpent: BigDecimal = BigDecimal.ZERO
-    var currentComment = MutableLiveData("")
-    var rawSpentValue = MutableLiveData("")
+    var currentCategoryId = savedStateHandle.getLiveData<String?>("categoryId", null)
+    var saving = MutableLiveData(false)
+    var currentComment = savedStateHandle.getLiveData("comment", "")
+    var rawSpentValue = savedStateHandle.getLiveData("amount", "")
+
+    init {
+        rawSpentValue.value?.takeIf { it.isNotEmpty() }?.toBigDecimalOrNull()?.let {
+            currentSpent = it
+            stage.value = EditStage.EDIT_SPENT
+        }
+    }
 
     fun startEditingSpent(transaction: Transaction) {
         editedTransaction = transaction
         currentSpent = transaction.value
         currentDate = transaction.date
+        currentCategoryId.value = transaction.categoryId
         currentComment.value = transaction.comment
         rawSpentValue.value = tryConvertStringToNumber(transaction.value.toString()).join(third = false)
 
@@ -52,6 +62,7 @@ class EditorViewModel @Inject constructor(
     fun resetEditingSpent() {
         currentSpent = BigDecimal.ZERO
         currentDate = Date()
+        currentCategoryId.value = null
         currentComment.value = ""
         rawSpentValue.value = ""
 
@@ -61,7 +72,7 @@ class EditorViewModel @Inject constructor(
     }
 
     fun canCommitEditingSpent(): Boolean {
-        if (stage.value !== EditStage.EDIT_SPENT) return false
+        if (saving.value == true || stage.value !== EditStage.EDIT_SPENT) return false
 
         val formatSpent = currentSpent
             .setScale(2, RoundingMode.HALF_EVEN)

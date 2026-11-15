@@ -25,7 +25,10 @@ class SpendsViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val spendsRepository: SpendsRepository,
 ) : ViewModel() {
-    var tags = spendsRepository.getAllTags()
+    var categories = spendsRepository.getCategories()
+
+    fun addCategory(name: String) = spendsRepository.addCategory(name)
+
     var transactions = spendsRepository.getAllTransactions()
     var spends = spendsRepository.getAllSpends()
     var budget = spendsRepository.getBudget().asLiveData()
@@ -88,6 +91,12 @@ class SpendsViewModel @Inject constructor(
     }
 
     // Spend handling
+
+    suspend fun saveSpent(transaction: Transaction, original: Transaction? = null) {
+        if (original != null) spendsRepository.editSpent(original, transaction)
+        else spendsRepository.addSpent(transaction)
+    }
+
 
     fun addSpent(transactionForAdd: Transaction) {
         viewModelScope.launch {

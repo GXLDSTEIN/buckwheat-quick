@@ -46,7 +46,8 @@ fun Editor(
                     indication = null
                 ) { focusController.focus() }
         ) {
-            EditorToolbar()
+            EditorToolbar(onOpenHistory = onOpenHistory)
+            BudgetBalances()
             if (mode == EditMode.EDIT) {
                 DateTimeEditPill()
             }
@@ -57,7 +58,7 @@ fun Editor(
                 focusController = focusController,
             )
             TaggingToolbar(editorFocusController = focusController)
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(8.dp))
         }
     }
 }

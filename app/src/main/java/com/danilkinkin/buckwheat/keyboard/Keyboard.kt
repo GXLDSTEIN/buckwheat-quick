@@ -47,8 +47,10 @@ fun Keyboard(
     val coroutineScope = rememberCoroutineScope()
     val mode by editorViewModel.mode.observeAsState(EditMode.ADD)
     val currentRawSpent by editorViewModel.rawSpentValue.observeAsState("")
+    val saving by editorViewModel.saving.observeAsState(false)
     var debugProgress by remember { mutableStateOf(0) }
     val dispatch = rememberAppKeyboardDispatcher { action, value ->
+        if (editorViewModel.saving.value == true) return@rememberAppKeyboardDispatcher
         var isMutate = true
         var newValue = editorViewModel.rawSpentValue.value ?: ""
 
@@ -269,7 +271,9 @@ fun Keyboard(
                                 .weight(1F)
                                 .padding(BUTTON_GAP),
                             type = KeyboardButtonType.PRIMARY,
-                            icon = painterResource(R.drawable.ic_apply),
+                            text = if (saving) context.getString(R.string.quick_saving) else null,
+                            icon = if (saving) null else painterResource(R.drawable.ic_apply),
+                            contentDescription = context.getString(R.string.quick_save),
                             onClick = {
                                 if (debugProgress == -1) {
                                     editorViewModel.resetEditingSpent()
@@ -293,36 +297,33 @@ fun Keyboard(
 
                                 debugProgress = 0
 
-                                runBlocking {
-                                    if (editorViewModel.canCommitEditingSpent()) {
-                                        if (mode == EditMode.EDIT) {
-                                            val newVersionOfSpent =
-                                                editorViewModel.editedTransaction!!.copy(
-                                                    value = editorViewModel.currentSpent,
-                                                    date = editorViewModel.currentDate,
-                                                    comment = (editorViewModel.currentComment.value
-                                                        ?: "").trim()
-                                                )
-
-                                            spendsViewModel.removeSpent(
-                                                editorViewModel.editedTransaction!!,
-                                                silent = true
-                                            )
-                                            spendsViewModel.addSpent(newVersionOfSpent)
-                                        } else {
-                                            spendsViewModel.addSpent(
-                                                Transaction(
-                                                    type = TransactionType.SPENT,
-                                                    value = editorViewModel.currentSpent,
-                                                    date = Date(),
-                                                    comment = (editorViewModel.currentComment.value
-                                                        ?: "").trim()
-                                                )
-                                            )
-                                            appViewModel.activateTutorial(TUTORS.OPEN_HISTORY)
-                                        }
-
+                                if (!editorViewModel.canCommitEditingSpent()) return@KeyboardButton
+                                editorViewModel.saving.value = true
+                                val original = editorViewModel.editedTransaction
+                                val transaction = Transaction(
+                                    type = TransactionType.SPENT,
+                                    value = editorViewModel.currentSpent,
+                                    date = if (original == null) Date() else editorViewModel.currentDate,
+                                    comment = editorViewModel.currentComment.value.orEmpty().trim(),
+                                    categoryId = editorViewModel.currentCategoryId.value,
+                                ).also { it.uid = original?.uid ?: 0 }
+                                coroutineScope.launch {
+                                    try {
+                                        spendsViewModel.saveSpent(transaction, original)
                                         editorViewModel.resetEditingSpent()
+                                        appViewModel.showSnackbar(
+                                            message = context.getString(R.string.quick_saved),
+                                            actionLabel = if (original == null) context.getString(R.string.quick_undo) else null,
+                                            duration = androidx.compose.material3.SnackbarDuration.Short,
+                                        ) { result ->
+                                            if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) {
+                                                spendsViewModel.removeSpent(transaction, silent = true)
+                                            }
+                                        }
+                                    } catch (error: Exception) {
+                                        appViewModel.showSnackbar(context.getString(R.string.quick_save_failed))
+                                    } finally {
+                                        editorViewModel.saving.value = false
                                     }
                                 }
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)

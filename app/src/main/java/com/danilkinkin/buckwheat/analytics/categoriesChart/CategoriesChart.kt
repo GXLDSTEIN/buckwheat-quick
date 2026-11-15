@@ -22,6 +22,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.danilkinkin.buckwheat.data.SpendsViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -65,9 +68,11 @@ fun CategoriesChartCard(
     modifier: Modifier = Modifier,
     spends: List<Transaction>,
     currency: ExtendCurrency,
+    spendsViewModel: SpendsViewModel = hiltViewModel(),
 ) {
     val isNightMode = isNightMode()
-    val labelWithoutTag = stringResource(R.string.without_tag)
+    val labelWithoutTag = stringResource(R.string.quick_uncategorized)
+    val categories by spendsViewModel.categories.observeAsState(emptyList())
     val labelRest = stringResource(R.string.rest_tags)
     val maxDisplay = 7
 
@@ -99,16 +104,15 @@ fun CategoriesChartCard(
 
     var offsetColor = 0
 
-    val tags by remember {
+    val tags by remember(spends, categories, labelWithoutTag, colors, restColor, labelRest) {
         // Convert to TagUsage, group by tag and sum amounts
         var result = spends
-            .map { it.copy(comment = it.comment.ifEmpty { labelWithoutTag }) }
-            .groupBy { it.comment.trim() }
+            .groupBy { it.categoryId }
             .map { tag ->
                 TagUsage(
-                    tag.key,
+                    categories.find { it.id == tag.key }?.name ?: labelWithoutTag,
                     tag.value.map { it.value }.reduce { acc, next -> acc + next },
-                    isSpecial = tag.key == labelWithoutTag,
+                    isSpecial = tag.key == null,
                 )
             }
             .sortedBy { it.amount }
@@ -176,7 +180,7 @@ fun CategoriesChartCard(
                         )
                         Column {
                             Text(
-                                text = "We can't split your spends by categories",
+                                text = stringResource(R.string.not_enough_data_for_tags_chart),
                                 style = MaterialTheme.typography.bodyLarge.copy(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 ),
@@ -186,7 +190,7 @@ fun CategoriesChartCard(
                                 modifier = Modifier.fillMaxWidth(),
                             ) {
                                 Text(
-                                    text = "Use tags to see chart by categories ",
+                                    text = stringResource(R.string.quick_category_hint),
                                     style = MaterialTheme.typography.bodyMedium.copy(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.8f),
                                     ),
