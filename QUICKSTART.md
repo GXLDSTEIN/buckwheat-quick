@@ -46,6 +46,8 @@ For tagged releases, add the permanent key as a base64 GitHub Actions secret `BU
 
 For each update, increase `versionCode` and `versionName` in `app/build.gradle.kts`, update the changelog, commit and push, then push the matching version tag. Keep the permanent signing key. Releases contain `buckwheat-quick.apk` and `SHA256SUMS`; an existing published APK is preserved when a workflow is re-run.
 
+To repeat an existing release using the latest workflow, run the Android workflow manually with `release_tag` set to the existing tag (for example, `v0.1.0`). Leave that input empty to run checks only. Existing published APK assets are preserved.
+
 Users add the repository URL to Obtainium to install and track updates: [official Obtainium instructions](https://wiki.obtainium.imranr.dev/ui_overview/#add-app-page).
 
 Financial records are local to the phone. GitHub contains source and APKs, not your expense database. Future database schema changes must include non-destructive migrations; destructive fallback is disabled.
