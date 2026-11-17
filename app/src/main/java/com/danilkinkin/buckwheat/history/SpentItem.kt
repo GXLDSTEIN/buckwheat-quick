@@ -2,6 +2,11 @@ package com.danilkinkin.buckwheat.history
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.semantics.Role
+import com.danilkinkin.buckwheat.data.AppViewModel
+import com.danilkinkin.buckwheat.data.PathState
+import com.danilkinkin.buckwheat.analytics.CATEGORY_EXPENSES
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -32,6 +37,7 @@ fun SpentItem(
     currency: ExtendCurrency,
     modifier: Modifier = Modifier,
     spendsViewModel: SpendsViewModel = hiltViewModel(),
+    appViewModel: AppViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val categories by spendsViewModel.categories.observeAsState(emptyList())
@@ -69,7 +75,9 @@ fun SpentItem(
             }
         }
         Text(
-            modifier = Modifier.padding(horizontal = 32.dp),
+            modifier = Modifier.clickable(role = Role.Button) {
+                appViewModel.openSheet(PathState(CATEGORY_EXPENSES, mapOf("categoryId" to transaction.categoryId)))
+            }.padding(horizontal = 32.dp, vertical = 8.dp),
             text = categories.find { it.id == transaction.categoryId }?.name
                 ?: stringResource(R.string.quick_uncategorized),
             style = MaterialTheme.typography.labelMedium,

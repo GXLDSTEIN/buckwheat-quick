@@ -2,13 +2,14 @@
 
 A personal fork of [Buckwheat](https://github.com/danilkinkin/buckwheat) for recording purchases immediately and seeing the remaining budget. GPL-3.0; upstream attribution and license are retained.
 
-## First version (0.1.0)
+## Current version (0.2.0)
 
 - Enter an amount using the existing numeric keypad and tap the check mark to save.
-- Category and comment are independent, optional fields. Frequent categories appear first; create a category from the same row.
+- Category and comment are independent, optional fields. Two frequent or selected categories stay in quick access. The All button opens a searchable grid with vertical scrolling; create a category from the same picker.
 - See the signed remainder for today and for the selected budget period. Set the end date to month end or your next payday in the wallet screen.
 - Unspent money is redistributed across the remaining days by default.
 - Undo a newly added purchase from the confirmation message; edit earlier purchases in history.
+- Analytics is one tap away in the toolbar. Category labels in analytics and history open the category’s expenses, comments, total and count for the active period.
 - Category analytics and CSV export use the separate category field.
 - This installs as `app.buckwheat.quick`, alongside the original app, with its own empty database.
 - Starting a new budget period retains previous records in the database. An archive browsing screen and full backup/restore are future work; current history and exports show the active period.

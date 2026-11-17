@@ -1,4 +1,15 @@
-# Validation — 0.1.0
+# Validation
+
+## 0.2.0 — 2026-11-17
+
+- Debug APK and instrumentation APK build successfully; lint reports zero errors.
+- All 10 instrumentation tests pass on Android 15: five existing repository checks and five new category UI/filter checks.
+- With 81 categories, the picker shows at least eight selectable items without horizontal scrolling, finds a distant Cyrillic name case-insensitively, clears selection and passes search text to category creation.
+- Category details preserve comments, sort newest first, exclude other categories and income transactions, and handle uncategorized and empty categories.
+- Manual upgrade over 0.1.0 retained the previous purchases and period balance. The Room schema and signing key are unchanged.
+- Manually entered 12, chose Cafés from the grid and added comment Cafe020; both draft fields survived the picker. The analytics shortcut opened the screen directly, and tapping Cafés showed exactly that purchase/comment with total 12 and count 1, excluding Groceries.
+
+## 0.1.0 — 2026-11-15
 
 Validated on 2026-11-15 with Android 15 (API 35), x86_64 emulator. Physical phone testing remains for the user.
 

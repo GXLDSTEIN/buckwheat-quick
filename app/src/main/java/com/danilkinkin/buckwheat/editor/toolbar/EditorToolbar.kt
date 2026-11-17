@@ -93,6 +93,11 @@ fun EditorToolbar(
                 maxLines = 1,
                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
             )
+            BigIconButton(
+                icon = painterResource(R.drawable.ic_analytics),
+                contentDescription = androidx.compose.ui.res.stringResource(R.string.view_analytics),
+                onClick = { appViewModel.openSheet(PathState(com.danilkinkin.buckwheat.analytics.ANALYTICS_SHEET)) },
+            )
             if (onOpenHistory != null) {
                 BigIconButton(
                     icon = painterResource(R.drawable.ic_clock),

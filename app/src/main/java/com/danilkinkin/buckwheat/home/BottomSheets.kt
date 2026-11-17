@@ -40,6 +40,14 @@ fun BottomSheets(
     appViewModel: AppViewModel = hiltViewModel(),
     spendsViewModel: SpendsViewModel = hiltViewModel(),
 ) {
+    val sheets by appViewModel.sheetStates.observeAsState(emptyMap())
+    val categoryState = sheets[com.danilkinkin.buckwheat.analytics.CATEGORY_EXPENSES]
+    if (categoryState != null) {
+        com.danilkinkin.buckwheat.analytics.CategoryExpensesDialog(
+            categoryId = categoryState.args["categoryId"] as String?,
+            onDismiss = { appViewModel.closeSheet(com.danilkinkin.buckwheat.analytics.CATEGORY_EXPENSES) },
+        )
+    }
     val isDebug = appViewModel.isDebug.observeAsState(false)
     val coroutineScope = rememberCoroutineScope()
 

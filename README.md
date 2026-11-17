@@ -23,9 +23,10 @@ Each release has one universal APK, `buckwheat-quick.apk`. No APK filter or arch
 ## Features
 
 - Numeric keypad ready for recording a purchase.
-- Separate category and optional free-text comment; frequently used categories first.
+- Separate category and optional free-text comment; two quick choices plus a full-screen category grid with search.
 - Signed balance for today and the selected budget period, including overspending.
-- Undo after adding an expense, history access, category analytics and CSV export.
+- One-tap analytics; tap any category in analytics or history for its expenses and comments.
+- Undo after adding an expense, history access and CSV export.
 - Automatic redistribution of the remaining budget across the remaining days by default.
 - Local financial records: no account or synchronization required.
 

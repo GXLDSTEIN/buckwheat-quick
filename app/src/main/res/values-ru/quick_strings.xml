@@ -24,4 +24,13 @@
     </string-array>
     <string name="quick_save">Сохранить расход</string>
     <string name="quick_category_hint">Выбирайте категории расходов, чтобы видеть распределение</string>
+    <string name="quick_categories">Категории</string>
+    <string name="quick_all_categories">Все категории</string>
+    <string name="quick_all_short">Все</string>
+    <string name="quick_search_categories">Поиск категорий</string>
+    <string name="quick_no_categories">Категории не найдены</string>
+    <string name="quick_category_period">Расходы за текущий бюджетный период</string>
+    <string name="quick_expense_count">Количество трат: %1$d</string>
+    <string name="quick_category_empty">В этой категории пока нет трат</string>
+    <string name="quick_category_open_hint">Нажмите категорию, чтобы посмотреть траты и комментарии</string>
 </resources>

@@ -1,12 +1,12 @@
 package com.danilkinkin.buckwheat.editor.tagging
 
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -21,6 +21,7 @@ fun TaggingToolbar(
     editorViewModel: EditorViewModel = hiltViewModel(),
     editorFocusController: FocusController,
 ) {
+    val allCategoriesLabel = stringResource(R.string.quick_all_categories)
     val categories by spendsViewModel.categories.observeAsState(emptyList())
     val spends by spendsViewModel.spends.observeAsState(emptyList())
     val selected by editorViewModel.currentCategoryId.observeAsState()
@@ -32,27 +33,33 @@ fun TaggingToolbar(
     var categoryName by remember { mutableStateOf("") }
     var commentDraft by remember { mutableStateOf("") }
 
+    var showPicker by remember { mutableStateOf(false) }
+    val quickCategories = remember(sorted, selected) {
+        (sorted.filter { it.id == selected } + sorted.filter { it.id != selected }).take(2)
+    }
+
     Column(Modifier.fillMaxWidth()) {
         Row(
-            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 20.dp),
+            Modifier.fillMaxWidth().padding(horizontal = 20.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
         ) {
-            FilterChip(
-                selected = selected == null,
-                onClick = { editorViewModel.currentCategoryId.value = null },
-                label = { Text(stringResource(R.string.quick_uncategorized)) },
-            )
-            sorted.forEach { category ->
+            quickCategories.forEach { category ->
                 FilterChip(
                     selected = selected == category.id,
-                    onClick = { editorViewModel.currentCategoryId.value = category.id },
-                    label = { Text(category.name) },
+                    onClick = { editorViewModel.currentCategoryId.value = if (selected == category.id) null else category.id },
+                    label = { Text(category.name, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
+                    modifier = Modifier.weight(1f),
                 )
             }
-            AssistChip(
-                onClick = { categoryName = ""; showCategoryDialog = true },
-                label = { Text(stringResource(R.string.quick_add_category)) },
-            )
+            OutlinedButton(
+                onClick = { showPicker = true },
+                contentPadding = PaddingValues(horizontal = 12.dp),
+                modifier = Modifier.semantics { contentDescription = allCategoriesLabel },
+            ) {
+                Text(stringResource(R.string.quick_all_short))
+                Icon(androidx.compose.ui.res.painterResource(R.drawable.ic_arrow_down), null, Modifier.size(18.dp))
+            }
         }
         TextButton(
             onClick = { commentDraft = comment; showCommentDialog = true },
@@ -67,6 +74,23 @@ fun TaggingToolbar(
         }
     }
 
+    if (showPicker) {
+        CategoryPicker(
+            categories = sorted,
+            selectedId = selected,
+            onSelect = {
+                editorViewModel.currentCategoryId.value = it
+                showPicker = false
+                editorFocusController.focus()
+            },
+            onCreate = {
+                categoryName = it.take(40)
+                showPicker = false
+                showCategoryDialog = true
+            },
+            onDismiss = { showPicker = false; editorFocusController.focus() },
+        )
+    }
     if (showCategoryDialog) {
         val existing = categories.find { it.name.equals(categoryName.trim(), ignoreCase = true) }
         AlertDialog(

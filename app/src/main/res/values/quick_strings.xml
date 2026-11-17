@@ -25,4 +25,13 @@
     </string-array>
     <string name="quick_save">Save expense</string>
     <string name="quick_category_hint">Choose categories for your expenses to see the breakdown</string>
+    <string name="quick_categories">Categories</string>
+    <string name="quick_all_categories">All categories</string>
+    <string name="quick_all_short">All</string>
+    <string name="quick_search_categories">Search categories</string>
+    <string name="quick_no_categories">No matching categories</string>
+    <string name="quick_category_period">Expenses in the current budget period</string>
+    <string name="quick_expense_count">Expenses: %1$d</string>
+    <string name="quick_category_empty">No expenses in this category yet</string>
+    <string name="quick_category_open_hint">Tap a category to see its expenses and comments</string>
 </resources>
